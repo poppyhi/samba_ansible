@@ -1,0 +1,8 @@
+---
+
+- name: apply samba service
+  hosts: samba
+  remote_user: ansible
+  sudo: yes
+  roles:
+    - samba

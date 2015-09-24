@@ -1,0 +1,42 @@
+---
+- name: install samba
+  yum: name={{ item }} state=latest
+  with_items:
+    - samba
+    - samba-client
+    - samba-common
+  tags: samba
+
+- name: make directory for samba
+  file: path="{{ samba_dir_path }}" state=directory owner=nobody group=nobody mode=0777
+  tags: samba
+
+- name: set selinux for samba 1
+  command: /sbin/setsebool -P samba_domain_controller on
+  tags: samba
+
+- name: set selinux for samba 2
+  command: /bin/chcon -t samba_share_t "{{ samba_dir_path }}"
+  tags: samba
+
+- name: set samba config
+  template: src=smb.conf.j2 dest=/etc/samba/smb.conf
+  notify: restart samba
+  tags: samba
+
+- name: smb runnning
+  service: name=smb state=started enabled=yes
+  tags: samba
+
+- name: nmb runnning
+  service: name=nmb state=started enabled=yes
+  tags: samba
+
+- name: set firewalld samba
+  firewalld: zone=public service=samba permanent=true state=enabled
+  notify: restart firewalld
+  tags: firewalld
+
+- name: set samba user
+  shell: /bin/echo -e ""{{ samba_passwd }}"\n"{{ samba_passwd }}"\n" | /bin/pdbedit -t -a "{{ samba_user }}"
+  tags: samba

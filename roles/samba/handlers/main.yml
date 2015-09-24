@@ -1,0 +1,8 @@
+---
+- name: restart firewalld
+  service: name=firewalld state=restarted
+  tags: firewalld
+
+- name: restart samba
+  service: name=smb state=restarted
+  tags: samba
